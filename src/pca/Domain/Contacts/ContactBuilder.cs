@@ -88,8 +88,6 @@ public sealed class ContactBuilder
     /// </summary>
     public void ApplyTo(Contact contact)
     {
-        ArgumentNullException.ThrowIfNull(contact);
-
         EnsureValid();
 
         contact.UpdateName(_firstName!, _lastName!);
