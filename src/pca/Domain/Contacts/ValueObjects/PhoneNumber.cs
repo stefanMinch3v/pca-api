@@ -13,6 +13,12 @@ public sealed partial record PhoneNumber
     public const string InvalidFormatMessage =
         "Phone number must be a valid international number, e.g. +1234567890 (7-15 digits, optional leading '+').";
 
+    // internal (not private) so the Application layer's FluentValidation
+    // rules can reuse these instead of redeclaring the same bounds. Must be
+    // kept in sync with PhoneNumberRegex below (7-15 digits, optional '+').
+    internal const int MinLength = 7;
+    internal const int MaxLength = 16;
+
     public string Value { get; }
 
     private PhoneNumber(string value)

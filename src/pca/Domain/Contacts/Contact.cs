@@ -11,7 +11,9 @@ namespace pca.Domain.Contacts;
 /// </summary>
 public sealed class Contact : Entity
 {
-    private const int MaxNameLength = 100;
+    // internal (not private) so the Application layer's FluentValidation
+    // rules can reuse this instead of redeclaring the same bound.
+    internal const int MaxNameLength = 100;
 
     public const string FirstNameRequiredMessage = "First name is required.";
     public const string LastNameRequiredMessage = "Last name is required.";
