@@ -77,6 +77,41 @@ public class ContactBuilderSpecs
         Assert.Contains(PhoneNumber.InvalidFormatMessage, exception.Errors);
     }
 
+    [Fact]
+    public void ApplyTo_WithValidFields_UpdatesExistingContactInPlace()
+    {
+        var contact = ValidBuilder().Build();
+        var originalId = contact.Id;
+
+        new ContactBuilder()
+            .WithFirstName("Grace")
+            .WithLastName("Hopper")
+            .WithDateOfBirth(new DateOnly(1906, 12, 9))
+            .WithAddress("2 Side St", "Manchester", "M1 1AE", "UK")
+            .WithPhoneNumber("+447911999999")
+            .WithIban("DE89370400440532013000")
+            .ApplyTo(contact);
+
+        Assert.Equal(originalId, contact.Id);
+        Assert.Equal("Grace", contact.FirstName);
+        Assert.Equal("Hopper", contact.LastName);
+        Assert.Equal("Manchester", contact.Address.City);
+        Assert.Equal("+447911999999", contact.PhoneNumber.Value);
+        Assert.Equal("DE89370400440532013000", contact.Iban.Value);
+    }
+
+    [Fact]
+    public void ApplyTo_WithMissingFields_ThrowsDomainValidationExceptionAndLeavesContactUnchanged()
+    {
+        var contact = ValidBuilder().Build();
+
+        var exception = Assert.Throws<DomainValidationException>(() => new ContactBuilder().ApplyTo(contact));
+
+        Assert.Equal(6, exception.Errors.Count);
+        Assert.Equal(FirstName, contact.FirstName);
+        Assert.Equal(ValidIban, contact.Iban.Value);
+    }
+
     private static ContactBuilder ValidBuilder() =>
         new ContactBuilder()
             .WithFirstName(FirstName)

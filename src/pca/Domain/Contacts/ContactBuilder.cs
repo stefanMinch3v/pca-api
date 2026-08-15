@@ -68,6 +68,39 @@ public sealed class ContactBuilder
     /// </summary>
     public Contact Build()
     {
+        EnsureValid();
+
+        return new Contact(
+            Guid.CreateVersion7(),
+            _firstName!,
+            _lastName!,
+            _dateOfBirth!.Value,
+            _address!,
+            _phoneNumber!,
+            _iban!);
+    }
+
+    /// <summary>
+    /// Same aggregated validation as <see cref="Build"/>, but applies the
+    /// fields onto an existing <paramref name="contact"/> instead of
+    /// creating a new one - reused by the Update flow so it doesn't have to
+    /// re-implement the with-all-fields validation/aggregation logic.
+    /// </summary>
+    public void ApplyTo(Contact contact)
+    {
+        ArgumentNullException.ThrowIfNull(contact);
+
+        EnsureValid();
+
+        contact.UpdateName(_firstName!, _lastName!);
+        contact.UpdateDateOfBirth(_dateOfBirth!.Value);
+        contact.UpdateAddress(_address!);
+        contact.UpdatePhoneNumber(_phoneNumber!);
+        contact.UpdateIban(_iban!);
+    }
+
+    private void EnsureValid()
+    {
         if (_firstName is null)
         {
             _errors.Add(Contact.FirstNameRequiredMessage);
@@ -102,15 +135,6 @@ public sealed class ContactBuilder
         {
             throw new DomainValidationException([.. _errors.Distinct()]);
         }
-
-        return new Contact(
-            Guid.CreateVersion7(),
-            _firstName!,
-            _lastName!,
-            _dateOfBirth!.Value,
-            _address!,
-            _phoneNumber!,
-            _iban!);
     }
 
     private T? TryCreate<T>(Func<T> func) where T : class
