@@ -8,10 +8,12 @@ namespace pca.Domain.Contacts.ValueObjects;
 /// </summary>
 public sealed record Address
 {
-    private const int MaxStreetLength = 200;
-    private const int MaxCityLength = 100;
-    private const int MaxPostalCodeLength = 20;
-    private const int MaxCountryLength = 100;
+    // internal (not private) so the Application layer's FluentValidation
+    // rules can reuse these instead of redeclaring the same bounds.
+    internal const int MaxStreetLength = 200;
+    internal const int MaxCityLength = 100;
+    internal const int MaxPostalCodeLength = 20;
+    internal const int MaxCountryLength = 100;
 
     public string Street { get; }
     public string City { get; }

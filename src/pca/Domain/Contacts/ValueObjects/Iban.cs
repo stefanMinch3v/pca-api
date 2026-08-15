@@ -9,8 +9,10 @@ namespace pca.Domain.Contacts.ValueObjects;
 /// </summary>
 public sealed record Iban
 {
-    private const int MinLength = 15;
-    private const int MaxLength = 34;
+    // internal (not private) so the Application layer's FluentValidation
+    // rules can reuse these instead of redeclaring the same bounds.
+    internal const int MinLength = 15;
+    internal const int MaxLength = 34;
 
     public const string RequiredErrorMessage = "IBAN is required.";
     public const string InvalidStructureMessage = "IBAN must start with a 2-letter country code and 2 check digits, followed by alphanumeric characters.";
