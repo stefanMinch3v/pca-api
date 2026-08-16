@@ -1,10 +1,15 @@
 ﻿namespace pca.Application.Common
 {
-    public enum ResultStatus
+    /// <summary>
+    /// A bag of human-readable messages describing why an operation failed.
+    /// Deliberately carries no HTTP semantics (no "NotFound"/"Conflict" kind,
+    /// no status code) - this layer only knows Success/Failure. Mapping a
+    /// failure onto an HTTP response (status code, ProblemDetails, or a
+    /// plain 404) is entirely the API layer's job.
+    /// </summary>
+    public sealed record Error(IReadOnlyList<string> Messages)
     {
-        Ok,
-        Invalid,
-        NotFound
+        public static readonly Error None = new([]);
     }
 
     /// <summary>
@@ -20,35 +25,27 @@
 
     public class Result : IFailureResult<Result>
     {
-        private readonly IEnumerable<string> errors;
-
-        internal Result(bool succeeded, ResultStatus status, IEnumerable<string> errors)
+        internal Result(bool succeeded, Error error)
         {
             this.Succeeded = succeeded;
-            this.Status = status;
-            this.errors = errors;
+            this.Error = error;
         }
 
         public bool Succeeded { get; }
 
-        public ResultStatus Status { get; }
-
-        public IEnumerable<string> Errors
-            => this.Succeeded
-                ? Enumerable.Empty<string>()
-                : this.errors;
+        public Error Error { get; }
 
         public static Result Success
-            => new(true, ResultStatus.Ok, Enumerable.Empty<string>());
+            => new(true, Error.None);
+
+        public static Result Failure(string error)
+            => Failure([error]);
 
         public static Result Failure(IEnumerable<string> errors)
-            => new(false, ResultStatus.Invalid, errors);
-
-        public static Result NotFound(string error)
-            => new(false, ResultStatus.NotFound, [error]);
+            => new(false, new Error(errors.ToList()));
 
         public static implicit operator Result(string error)
-            => Failure(new[] { error });
+            => Failure(error);
 
         public static implicit operator Result(string[] errors)
             => Failure(errors);
@@ -57,37 +54,37 @@
             => Failure(errors);
 
         public static implicit operator Result(bool success)
-            => success ? Success : Failure(Enumerable.Empty<string>());
+            => success ? Success : Failure([]);
     }
 
     public class Result<TData> : Result, IFailureResult<Result<TData>>
     {
-        private readonly TData? data;
+        private readonly TData? value;
 
-        private Result(bool succeeded, ResultStatus status, TData? data, IEnumerable<string> errors)
-            : base(succeeded, status, errors)
-            => this.data = data;
+        private Result(bool succeeded, Error error, TData? value)
+            : base(succeeded, error)
+            => this.value = value;
 
-        public TData Data
+        public TData Value
             => this.Succeeded
-                ? this.data!
+                ? this.value!
                 : throw new InvalidOperationException(
-                    $"{nameof(this.Data)} is not available with a failed result. Use {nameof(this.Errors)} instead.");
+                    $"{nameof(this.Value)} is not available with a failed result. Use {nameof(this.Error)} instead.");
 
-        public static Result<TData> SuccessWith(TData data)
-            => new(true, ResultStatus.Ok, data, Enumerable.Empty<string>());
+        public static Result<TData> SuccessWith(TData value)
+            => new(true, Error.None, value);
+
+        public new static Result<TData> Failure(string error)
+            => Failure([error]);
 
         public new static Result<TData> Failure(IEnumerable<string> errors)
-            => new(false, ResultStatus.Invalid, default, errors);
+            => new(false, new Error(errors.ToList()), default);
 
-        public new static Result<TData> NotFound(string error)
-            => new(false, ResultStatus.NotFound, default, [error]);
-
-        public static implicit operator Result<TData>(TData data)
-            => SuccessWith(data);
+        public static implicit operator Result<TData>(TData value)
+            => SuccessWith(value);
 
         public static implicit operator Result<TData>(string error)
-            => Failure(new[] { error });
+            => Failure(error);
 
         public static implicit operator Result<TData>(string[] errors)
             => Failure(errors);

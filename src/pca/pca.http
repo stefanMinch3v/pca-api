@@ -1,6 +1,61 @@
 @pca_HostAddress = http://localhost:5071
 
-GET {{pca_HostAddress}}/weatherforecast/
+### Create a contact
+# @name createContact
+POST {{pca_HostAddress}}/api/contacts
+Content-Type: application/json
+
+{
+  "firstName": "Jane",
+  "lastName": "Doe",
+  "dateOfBirth": "1990-05-15",
+  "country": "Germany",
+  "street": "Musterstrasse 1",
+  "postalCode": "10115",
+  "city": "Berlin",
+  "phoneNumber": "+15551234567",
+  "iban": "DE89370400440532013000"
+}
+
+###
+
+### Get the contact created above
+GET {{pca_HostAddress}}/api/contacts/{{createContact.response.body.$.id}}
 Accept: application/json
+
+###
+
+### List contacts (first page - pageSize is fixed server-side)
+GET {{pca_HostAddress}}/api/contacts
+Accept: application/json
+
+###
+
+### List contacts (next page - pageKey comes from the previous response's nextPageKey)
+GET {{pca_HostAddress}}/api/contacts?pageKey=REPLACE_WITH_NEXT_PAGE_KEY
+Accept: application/json
+
+###
+
+### Update the contact created above
+PUT {{pca_HostAddress}}/api/contacts/{{createContact.response.body.$.id}}
+Content-Type: application/json
+
+{
+  "firstName": "Jane",
+  "lastName": "Smith",
+  "dateOfBirth": "1990-05-15",
+  "country": "Germany",
+  "street": "Musterstrasse 2",
+  "postalCode": "10115",
+  "city": "Berlin",
+  "phoneNumber": "+15551234567",
+  "iban": "DE89370400440532013000"
+}
+
+###
+
+### Delete the contact created above
+DELETE {{pca_HostAddress}}/api/contacts/{{createContact.response.body.$.id}}
 
 ###
