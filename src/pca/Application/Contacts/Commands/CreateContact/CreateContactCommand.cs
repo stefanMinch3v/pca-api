@@ -1,6 +1,7 @@
 using MediatR;
 using pca.Application.Common;
 using pca.Application.Common.Extensions;
+using pca.Application.Common.Interfaces;
 using pca.Application.Contacts.InputModels;
 using pca.Application.Contacts.OutputModels;
 using pca.Domain.Common;
@@ -12,7 +13,7 @@ public class CreateContactCommand : IRequest<Result<ContactDetailsOutputModel>>
 {
     public ContactInputModel Contact { get; set; } = default!;
 
-    internal class CreateContactCommandHandler(IContactRepository contactRepository)
+    internal class CreateContactCommandHandler(IApplicationDbContext dbContext)
         : IRequestHandler<CreateContactCommand, Result<ContactDetailsOutputModel>>
     {
         public async Task<Result<ContactDetailsOutputModel>> Handle(CreateContactCommand request, CancellationToken cancellationToken)
@@ -35,7 +36,8 @@ public class CreateContactCommand : IRequest<Result<ContactDetailsOutputModel>>
                 return Result<ContactDetailsOutputModel>.Failure(ex.Errors);
             }
 
-            await contactRepository.AddAsync(contact, cancellationToken);
+            dbContext.Contacts.Add(contact);
+            await dbContext.SaveChangesAsync(cancellationToken);
 
             return contact.ToDetailsOutputModel();
         }
