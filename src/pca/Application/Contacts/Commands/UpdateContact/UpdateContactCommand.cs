@@ -1,6 +1,8 @@
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using pca.Application.Common;
 using pca.Application.Common.Extensions;
+using pca.Application.Common.Interfaces;
 using pca.Application.Contacts.InputModels;
 using pca.Application.Contacts.OutputModels;
 using pca.Domain.Common;
@@ -14,12 +16,12 @@ public class UpdateContactCommand : IRequest<Result<ContactDetailsOutputModel>>
 
     public ContactInputModel Contact { get; set; } = default!;
 
-    internal class UpdateContactCommandHandler(IContactRepository contactRepository)
+    internal class UpdateContactCommandHandler(IApplicationDbContext dbContext)
         : IRequestHandler<UpdateContactCommand, Result<ContactDetailsOutputModel>>
     {
         public async Task<Result<ContactDetailsOutputModel>> Handle(UpdateContactCommand request, CancellationToken cancellationToken)
         {
-            var contact = await contactRepository.GetByIdAsync(request.Id, cancellationToken);
+            var contact = await dbContext.Contacts.FirstOrDefaultAsync(c => c.Id == request.Id, cancellationToken);
             if (contact is null)
             {
                 return Result<ContactDetailsOutputModel>.NotFound($"Contact with id '{request.Id}' was not found.");
@@ -27,6 +29,8 @@ public class UpdateContactCommand : IRequest<Result<ContactDetailsOutputModel>>
 
             try
             {
+                // Mutates the same tracked instance in place, so EF's change
+                // tracker picks up the update - no explicit Update() call needed.
                 new ContactBuilder()
                     .WithFirstName(request.Contact.FirstName)
                     .WithLastName(request.Contact.LastName)
@@ -41,7 +45,7 @@ public class UpdateContactCommand : IRequest<Result<ContactDetailsOutputModel>>
                 return Result<ContactDetailsOutputModel>.Failure(ex.Errors);
             }
 
-            await contactRepository.UpdateAsync(contact, cancellationToken);
+            await dbContext.SaveChangesAsync(cancellationToken);
 
             return contact.ToDetailsOutputModel();
         }
