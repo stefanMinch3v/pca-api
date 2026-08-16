@@ -9,7 +9,7 @@ namespace pca.Domain.Contacts;
 /// instance can only be created through <see cref="ContactBuilder"/>
 /// (see <see cref="CreateBuilder"/>), which validates every field together.
 /// </summary>
-public sealed class Contact : Entity
+public sealed class Contact : Entity, IAuditable
 {
     // internal (not private) so the Application layer's FluentValidation
     // rules can reuse this instead of redeclaring the same bound.
@@ -24,6 +24,9 @@ public sealed class Contact : Entity
     public Address Address { get; private set; }
     public PhoneNumber PhoneNumber { get; private set; }
     public Iban Iban { get; private set; }
+
+    public DateTimeOffset CreatedAt { get; set; }
+    public DateTimeOffset UpdatedAt { get; set; }
 
     internal Contact(
         Guid id,
@@ -41,6 +44,18 @@ public sealed class Contact : Entity
         Address = address ?? throw new ArgumentNullException(nameof(address));
         PhoneNumber = phoneNumber ?? throw new ArgumentNullException(nameof(phoneNumber));
         Iban = iban ?? throw new ArgumentNullException(nameof(iban));
+    }
+
+    /// <summary>
+    /// Reserved for EF Core materialization.
+    /// </summary>
+    private Contact() : base(Guid.CreateVersion7())
+    {
+        FirstName = null!;
+        LastName = null!;
+        Address = null!;
+        PhoneNumber = null!;
+        Iban = null!;
     }
 
     public static ContactBuilder CreateBuilder() => new();
