@@ -24,7 +24,7 @@ public class UpdateContactCommand : IRequest<Result<ContactDetailsOutputModel>>
             var contact = await dbContext.Contacts.FirstOrDefaultAsync(c => c.Id == request.Id, cancellationToken);
             if (contact is null)
             {
-                return Result<ContactDetailsOutputModel>.NotFound($"Contact with id '{request.Id}' was not found.");
+                return Result<ContactDetailsOutputModel>.Failure($"Contact with id '{request.Id}' was not found.");
             }
 
             try

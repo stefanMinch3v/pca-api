@@ -17,7 +17,7 @@ public class DeleteContactCommand : IRequest<Result>
             var contact = await dbContext.Contacts.FirstOrDefaultAsync(c => c.Id == request.Id, cancellationToken);
             if (contact is null)
             {
-                return Result.NotFound($"Contact with id '{request.Id}' was not found.");
+                return Result.Failure($"Contact with id '{request.Id}' was not found.");
             }
 
             dbContext.Contacts.Remove(contact);

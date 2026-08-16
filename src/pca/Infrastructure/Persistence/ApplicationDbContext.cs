@@ -46,7 +46,8 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     {
         var changedEntries = this.ChangeTracker
             .Entries()
-            .Where(e => (e.Entity is IAuditable));
+            .Where(e => e.Entity is IAuditable 
+                && (e.State == EntityState.Added || e.State == EntityState.Modified));
 
         foreach (var entry in changedEntries)
         {
