@@ -38,4 +38,6 @@ app.ApplyMigrations();
 
 app.MapContactEndpoints();
 
+app.MapHealthChecks("/health");
+
 app.Run();

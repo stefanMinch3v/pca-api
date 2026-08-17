@@ -26,7 +26,7 @@ public sealed class Contact : Entity, IAuditable
     public Iban Iban { get; private set; }
 
     public DateTimeOffset CreatedAt { get; set; }
-    public DateTimeOffset UpdatedAt { get; set; }
+    public DateTimeOffset? UpdatedAt { get; set; }
 
     internal Contact(
         Guid id,
