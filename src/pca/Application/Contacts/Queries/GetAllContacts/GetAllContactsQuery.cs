@@ -18,7 +18,7 @@ namespace pca.Application.Contacts.Queries.GetAllContacts;
 /// </summary>
 public class GetAllContactsQuery : IRequest<Result<Page<ContactListingOutputModel>>>
 {
-    public const int DefaultPageSize = 20;
+    public const int DefaultPageSize = 10;
 
     /// <summary>
     /// Opaque, encoded key (see <see cref="PageKeyEncoder"/>) from the

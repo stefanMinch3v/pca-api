@@ -22,7 +22,7 @@ namespace pca.Infrastructure.Persistence.Migrations
                     phone_number = table.Column<string>(type: "character varying(16)", maxLength: 16, nullable: false),
                     iban = table.Column<string>(type: "character varying(34)", maxLength: 34, nullable: false),
                     created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    updated_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    updated_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     address_city = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     address_country = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     address_postal_code = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
